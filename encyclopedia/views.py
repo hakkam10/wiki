@@ -13,6 +13,12 @@ def index(request):
 
 def content(request, title):
     markdowner = Markdown()
-    return render(request, "encyclopedia/content.html", {
+    try:
+        return render(request, "encyclopedia/content.html", {
         "entry": markdowner.convert(util.get_entry(title))
     })
+    except TypeError:
+        return render(request, "encyclopedia/content.html", {
+        "entry": "Page does not exist"
+    })
+
