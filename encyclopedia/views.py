@@ -1,9 +1,20 @@
+from django import forms
 from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 
 import markdown2
 from markdown2 import Markdown
 
 from . import util
+
+class EditEntry(forms.Form):
+    content = forms.CharField(label="content", widget=forms.Textarea)
+
+class NewEntry(forms.Form):
+    title = forms.CharField(label="Title", widget=forms.TextInput(attrs={'class':'form-control'})) 
+    content = forms.CharField(label="content", widget=forms.Textarea)
+   
 
 
 def index(request):
@@ -25,8 +36,28 @@ def content(request, title):
     })
 
 def edit(request, title):
-    return render(request, "encyclopedia/edit.html", {
+    if request.method == "POST":
+        entry = EditEntry(request.POST)
+        if entry.is_valid():
+            content = entry.cleaned_data['content']
+            util.save_entry(title, content)
+            return HttpResponseRedirect(reverse("encyclopedia:content", args=(title,)))
+        else:
+            return render(request, "encyclopedia/edit.html", {
+            "message":"Error",
+            "title":title,
+            "content":entry.cleaned_data["content"],
+            "form":EditEntry(initial={"title":title, "content":util.get_entry(title)})
+            })
+    else:
+        return render(request, "encyclopedia/edit.html", {
         "title":title,
-        "content":util.get_entry(title)
+        "content":util.get_entry(title),
+        "form":EditEntry(initial={"title":title, "content":util.get_entry(title)})
+        })
+    
+def new(request):
+    return render(request, "encyclopedia/new.html", {
+        "form":NewEntry()
     })
 
