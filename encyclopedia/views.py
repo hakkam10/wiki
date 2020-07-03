@@ -15,10 +15,18 @@ def content(request, title):
     markdowner = Markdown()
     try:
         return render(request, "encyclopedia/content.html", {
-        "entry": markdowner.convert(util.get_entry(title))
+        "entry": markdowner.convert(util.get_entry(title)),
+        "title": title
     })
     except TypeError:
         return render(request, "encyclopedia/content.html", {
-        "entry": "Page does not exist"
+        "entry": "Page does not exist",
+        "title": "Error"
+    })
+
+def edit(request, title):
+    return render(request, "encyclopedia/edit.html", {
+        "title":title,
+        "content":util.get_entry(title)
     })
 
