@@ -46,8 +46,7 @@ def edit(request, title):
             return render(request, "encyclopedia/edit.html", {
             "message":"Error",
             "title":title,
-            "content":entry.cleaned_data["content"],
-            "form":EditEntry(initial={"title":title, "content":util.get_entry(title)})
+            "form":entry
             })
     else:
         return render(request, "encyclopedia/edit.html", {
@@ -57,7 +56,19 @@ def edit(request, title):
         })
     
 def new(request):
-    return render(request, "encyclopedia/new.html", {
-        "form":NewEntry()
-    })
+    if request.method == "POST":
+        entry = NewEntry(request.POST)
+        if entry.is_valid():
+            title = entry.cleaned_data['title']
+            content = entry.cleaned_data['content']
+            util.save_entry(title, content)
+            return HttpResponseRedirect(reverse("encyclopedia:content", args=(title,)))
+        else:
+            return render(request, "encyclopedia/new.html", {
+            "form":entry
+        })
+    else:
+        return render(request, "encyclopedia/new.html", {
+            "form":NewEntry()
+        })
 
