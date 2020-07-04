@@ -19,7 +19,7 @@ class NewEntry(forms.Form):
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
-        "entries": util.list_entries()
+        "entries": util.list_entries(),
     })
 
 def content(request, title):
@@ -27,12 +27,14 @@ def content(request, title):
     try:
         return render(request, "encyclopedia/content.html", {
         "entry": markdowner.convert(util.get_entry(title)),
-        "title": title
+        "title": title.capitalize(),
+        "entries": util.list_entries()
     })
     except TypeError:
         return render(request, "encyclopedia/content.html", {
         "entry": "Page does not exist",
-        "title": "Error"
+        "title": "Error",
+        "entries": util.list_entries()
     })
 
 def edit(request, title):
@@ -46,13 +48,15 @@ def edit(request, title):
             return render(request, "encyclopedia/edit.html", {
             "message":"Error",
             "title":title,
-            "form":entry
+            "form":entry,
+            "entries": util.list_entries()
             })
     else:
         return render(request, "encyclopedia/edit.html", {
         "title":title,
         "content":util.get_entry(title),
-        "form":EditEntry(initial={"title":title, "content":util.get_entry(title)})
+        "form":EditEntry(initial={"title":title, "content":util.get_entry(title)}),
+        "entries": util.list_entries()
         })
     
 def new(request):
@@ -65,10 +69,12 @@ def new(request):
             return HttpResponseRedirect(reverse("encyclopedia:content", args=(title,)))
         else:
             return render(request, "encyclopedia/new.html", {
-            "form":entry
+            "form":entry,
+            "entries": util.list_entries()
         })
     else:
         return render(request, "encyclopedia/new.html", {
-            "form":NewEntry()
+            "form":NewEntry(),
+            "entries": util.list_entries()
         })
 
