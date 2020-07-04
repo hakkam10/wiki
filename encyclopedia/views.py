@@ -78,3 +78,12 @@ def new(request):
             "entries": util.list_entries()
         })
 
+def result(request):
+    if request.method == "GET":
+        query = request.GET.get('q', None)
+        entries = util.list_entries()
+        return render(request, "encyclopedia/result.html",{
+        "query":query,
+        "entries": util.list_entries(),
+        "results": entries
+    })
