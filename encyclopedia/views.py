@@ -58,13 +58,21 @@ def edit(request, title):
         })
     
 def new(request):
+    filenames = util.list_entries()
     if request.method == "POST":
         entry = NewEntry(request.POST)
         if entry.is_valid():
             title = entry.cleaned_data['title']
             content = entry.cleaned_data['content']
-            util.save_entry(title, content)
-            return HttpResponseRedirect(reverse("encyclopedia:content", args=(title,)))
+            if title.casefold() not in [filename.casefold() for filename in filenames]:
+                util.save_entry(title, content)
+                return HttpResponseRedirect(reverse("encyclopedia:content", args=(title,)))
+            else:
+                return render(request, "encyclopedia/new.html", {
+                "form":entry,
+                "entries": util.list_entries(),
+                "message": "Title already exists!"
+        })
         else:
             return render(request, "encyclopedia/new.html", {
             "form":entry,
