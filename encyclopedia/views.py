@@ -79,11 +79,29 @@ def new(request):
         })
 
 def result(request):
-    if request.method == "GET":
-        query = request.GET.get('q', None)
-        entries = util.list_entries()
-        return render(request, "encyclopedia/result.html",{
-        "query":query,
-        "entries": util.list_entries(),
-        "results": entries
-    })
+    entries = util.list_entries()
+    query = str(request.GET.get('q', None))
+    results = [entry for entry in entries if query.casefold() in entry.casefold()]
+    if len(results) == 1:
+        if results[0].casefold() == query.casefold():
+            return HttpResponseRedirect(reverse("encyclopedia:content", args=(query,)))
+        else:
+            return render(request, "encyclopedia/result.html", {
+                "results":results,
+                "query":query,
+                "len":len(results),
+                "entries": util.list_entries()
+            })
+    elif len(results) > 1:
+        return render(request, "encyclopedia/result.html", {
+                "results":results,
+                "query":query,
+                "len":len(results),
+                "entries": util.list_entries()
+            })
+    else:
+        return render(request, "encyclopedia/result.html", {
+            "query":query,
+            "len":len(results),
+            "entries": util.list_entries()
+        })
