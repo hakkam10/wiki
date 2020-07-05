@@ -15,8 +15,6 @@ class NewEntry(forms.Form):
     title = forms.CharField(label="Title", widget=forms.TextInput(attrs={'class':'form-control'})) 
     content = forms.CharField(label="content", widget=forms.Textarea)
    
-
-
 def index(request):
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries(),
@@ -27,7 +25,7 @@ def content(request, title):
     try:
         return render(request, "encyclopedia/content.html", {
         "entry": markdowner.convert(util.get_entry(title)),
-        "title": title.capitalize(),
+        "title": str(title),
         "entries": util.list_entries()
     })
     except TypeError:
@@ -82,26 +80,18 @@ def result(request):
     entries = util.list_entries()
     query = str(request.GET.get('q', None))
     results = [entry for entry in entries if query.casefold() in entry.casefold()]
+    context = {
+                "results":results,
+                "query":query,
+                "len":len(results),
+                "entries": util.list_entries()
+            }
     if len(results) == 1:
         if results[0].casefold() == query.casefold():
             return HttpResponseRedirect(reverse("encyclopedia:content", args=(query,)))
         else:
-            return render(request, "encyclopedia/result.html", {
-                "results":results,
-                "query":query,
-                "len":len(results),
-                "entries": util.list_entries()
-            })
+            return render(request, "encyclopedia/result.html", context)
     elif len(results) > 1:
-        return render(request, "encyclopedia/result.html", {
-                "results":results,
-                "query":query,
-                "len":len(results),
-                "entries": util.list_entries()
-            })
+        return render(request, "encyclopedia/result.html", context)
     else:
-        return render(request, "encyclopedia/result.html", {
-            "query":query,
-            "len":len(results),
-            "entries": util.list_entries()
-        })
+        return render(request, "encyclopedia/result.html", context)
