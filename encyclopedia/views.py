@@ -26,7 +26,8 @@ def content(request, title):
         return render(request, "encyclopedia/content.html", {
         "entry": markdowner.convert(util.get_entry(title)),
         "title": str(title),
-        "entries": util.list_entries()
+        "entries": util.list_entries(),
+        "edit": "Edit this page"
     })
     except TypeError:
         return render(request, "encyclopedia/content.html", {
